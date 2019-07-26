@@ -170,6 +170,7 @@ class ALUCommands:
             or_gate:self.or_gate,
             not_gate:self.not_gate,
             shl:self.shl,
+            shr:self.shr,
             mod:self.mod
         }
         self.cpu = cpu
@@ -214,10 +215,10 @@ class ALUCommands:
         op_a = self.cpu.ram.read(self.cpu.pc + 1) if op_a == None else self.cpu.ram.read(op_a)
         op_b = self.cpu.ram.read(self.cpu.pc + 2) if op_b == None else self.cpu.ram.read(op_b)
         val1 = self.cpu.register[op_a]
-        val2 = self.cpu.register[ob_b]
-        newValue = f"{bin(val1,2)}{'0' * val2}"
-        if(len(newString) <= 8):
-            self.cpu.register[op_a] = int(newString,2)
+        newValue = f"{bin(val1)}{'0' * op_b}"
+        print(f"Shifted left: {val1} * {op_b} to {newValue}")
+        if(len(newValue) <= 8):
+            self.cpu.register[op_a] = int(newValue,2)
         else:
             print("ERROR: can't shift that far, value too large")
         return 2
@@ -226,20 +227,20 @@ class ALUCommands:
         op_a = self.cpu.ram.read(self.cpu.pc + 1) if op_a == None else self.cpu.ram.read(op_a)
         op_b = self.cpu.ram.read(self.cpu.pc + 2) if op_b == None else self.cpu.ram.read(op_b)
         val1 = self.cpu.register[op_a]
-        val2 = self.cpu.register[ob_b]
-        newValue = f"{'0' * val2}{bin(val1,2)}"
-        print(f"Shift right: {val1} to {newValue}")
-        if(len(newString) <= 8):
-            self.cpu.register[op_a] = int(newString,2)
+
+        if(len(bin(val1)[2:]) > op_b):
+            newValue = f"{bin(val1)[2:-op_b]}"
+            print(f"Shift right: {val1} to 0b{newValue}")
+            self.cpu.register[op_a] = int(newValue,2)
         else:
-            self.cpu.register[op_a] = int(newString[:8],2)
+            self.cpu.register[op_a] = 0
         return 2
 
     def mod(self, op_a=None, op_b=None):
         op_a = self.cpu.ram.read(self.cpu.pc + 1) if op_a == None else self.cpu.ram.read(op_a)
         op_b = self.cpu.ram.read(self.cpu.pc + 2) if op_b == None else self.cpu.ram.read(op_b)
         val1 = self.cpu.register[op_a]
-        val2 = self.cpu.register[ob_b]
+        val2 = self.cpu.register[op_b]
         newValue = val1 % val2
         self.cpu.register[op_a] = newValue
         print(f"MOD evaluation: {val1} MOD {val2} = {newValue}")
@@ -270,7 +271,7 @@ class CPU:
 
     def alu(self, ir):
         """ALU operations."""
-        self.aluCommands.list[ir]()
+        return self.aluCommands.list[ir]()
 
     def trace(self):
         """
