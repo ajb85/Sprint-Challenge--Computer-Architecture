@@ -271,9 +271,6 @@ class CPU:
     def alu(self, ir):
         """ALU operations."""
         self.aluCommands.list[ir]()
-        
-        # else:
-        #     raise Exception("Unsupported ALU operation")
 
     def trace(self):
         """
